@@ -1,0 +1,46 @@
+name: christiangeorgelucas/conventional-commit-tools
+version: 0.1.0
+language: typescript
+nodes:
+    - name: ParseCommit
+      input: CommitMessageRequest
+      output: ParseCommitResult
+    - name: ValidateCommit
+      input: ValidateCommitRequest
+      output: ValidateCommitResult
+    - name: ExtractType
+      input: CommitMessageRequest
+      output: ExtractTypeResult
+    - name: ExtractScope
+      input: CommitMessageRequest
+      output: ExtractScopeResult
+    - name: DetectBreakingChange
+      input: CommitMessageRequest
+      output: DetectBreakingChangeResult
+    - name: ExtractFooters
+      input: CommitMessageRequest
+      output: ExtractFootersResult
+    - name: ExtractIssueReferences
+      input: CommitMessageRequest
+      output: ExtractIssueReferencesResult
+    - name: DetermineReleaseType
+      input: CommitMessageRequest
+      output: DetermineReleaseTypeResult
+    - name: SplitHeaderBody
+      input: CommitMessageRequest
+      output: SplitHeaderBodyResult
+    - name: ParseRevert
+      input: CommitMessageRequest
+      output: ParseRevertResult
+    - name: ExtractMentions
+      input: CommitMessageRequest
+      output: ExtractMentionsResult
+    - name: ParseCommitLog
+      input: ParseCommitLogRequest
+      output: ParseCommitLogResult
+    - name: SummarizeCommits
+      input: SummarizeCommitsRequest
+      output: SummarizeCommitsResult
+    - name: ValidateSubject
+      input: ValidateSubjectRequest
+      output: ValidateSubjectResult

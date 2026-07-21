@@ -1,0 +1,192 @@
+// This file defines the data contracts (messages) for your Axiom package.
+// Every node's --input and --output refers to a message defined here.
+//
+// Run `axiom create message <Name>` to scaffold a new message below.
+// Run `axiom generate` to compile these definitions into language bindings in gen/.
+//
+// DOCUMENTATION
+//   Comments written directly above a message or field declaration are extracted
+//   automatically at publish time and shown in the Axiom registry as documentation.
+//   Write your descriptions there — no separate doc files needed.
+//
+//   Leading comment  (no blank line before the declaration) → registry description ✓
+//   Detached comment (blank line before the declaration)    → ignored by registry  ✗
+//
+// This file is yours to edit. Axiom only appends new message blocks — it never
+// overwrites or removes content you have written.
+
+syntax = "proto3";
+
+package christiangeorgelucas.conventional_commit_tools;
+
+// A single footer/trailer line, e.g. "Reviewed-by: Alice" -> token="Reviewed-by",
+// value="Alice", or the git-trailer hash form "Closes #123" -> token="Closes",
+// value="#123". Continuation lines (that don't start a new trailer) are folded
+// into the previous trailer's value, separated by a newline.
+message Footer {
+  string token = 1;
+  string value = 2;
+}
+
+// One issue/PR reference extracted from the commit message, e.g. "Closes #123"
+// or "fixes octocat/hello-world#123".
+message IssueReference {
+  string raw = 1;
+  string action = 2;
+  string issue = 3;
+  string prefix = 4;
+  string owner = 5;
+  string repository = 6;
+}
+
+// One structured validation problem. severity is "error" (makes the overall
+// result invalid) or "warning" (style/quality note, does not affect validity).
+message ValidationIssue {
+  string code = 1;
+  string message = 2;
+  string severity = 3;
+}
+
+// The canonical structured representation of one Conventional Commits (v1.0.0)
+// message: every parsing node either returns this in full (Parse) or a narrow
+// projection of it (the Extract*/Detect*/Determine* nodes).
+message ConventionalCommit {
+  string header = 1;
+  bool header_matched = 2;
+  string type = 3;
+  string scope = 4;
+  bool breaking = 5;
+  string breaking_description = 6;
+  string breaking_source = 7;
+  string subject = 8;
+  string body = 9;
+  string footer_raw = 10;
+  repeated Footer footers = 11;
+  repeated IssueReference references = 12;
+  repeated string mentions = 13;
+  bool is_revert = 14;
+  string revert_header = 15;
+  string revert_hash = 16;
+}
+
+// Shared input for every single-commit node: one raw commit message as text.
+message CommitMessageRequest {
+  string message = 1;
+}
+
+message ParseCommitResult {
+  ConventionalCommit commit = 1;
+  bool ok = 2;
+  string error = 3;
+}
+
+message ValidateCommitRequest {
+  string message = 1;
+  // When false (the default), the commit `type` must be all-lowercase to be
+  // considered valid (the overwhelming real-world convention). Set true to
+  // accept any case.
+  bool allow_any_type_case = 2;
+}
+
+message ValidateCommitResult {
+  bool valid = 1;
+  repeated ValidationIssue issues = 2;
+  ConventionalCommit commit = 3;
+}
+
+message ExtractTypeResult {
+  string type = 1;
+  bool found = 2;
+}
+
+message ExtractScopeResult {
+  string scope = 1;
+  bool found = 2;
+}
+
+message DetectBreakingChangeResult {
+  bool breaking = 1;
+  string description = 2;
+  // "marker" (type/scope!:), "footer" (BREAKING CHANGE: ...), "both", or "none".
+  string source = 3;
+}
+
+message ExtractFootersResult {
+  repeated Footer footers = 1;
+}
+
+message ExtractIssueReferencesResult {
+  repeated IssueReference references = 1;
+}
+
+message DetermineReleaseTypeResult {
+  // "major" | "minor" | "patch" | "none" — aligned with semver-tools' Increment
+  // node's release_type vocabulary so the two packages compose directly.
+  string release_type = 1;
+  string reason = 2;
+}
+
+message SplitHeaderBodyResult {
+  string header = 1;
+  string body = 2;
+}
+
+message ParseRevertResult {
+  bool is_revert = 1;
+  string reverted_header = 2;
+  string reverted_hash = 3;
+}
+
+message ExtractMentionsResult {
+  repeated string mentions = 1;
+}
+
+// A blob of multiple commit messages separated by a caller-supplied delimiter.
+message ParseCommitLogRequest {
+  string log = 1;
+  string delimiter = 2;
+  // 0 = default cap (500). Always hard-capped at 2000 regardless of the value
+  // supplied; excess commits are counted in `skipped`, not parsed.
+  int32 max_commits = 3;
+}
+
+message ParseCommitLogResult {
+  repeated ConventionalCommit commits = 1;
+  int32 count = 2;
+  int32 skipped = 3;
+  string error = 4;
+}
+
+message SummarizeCommitsRequest {
+  string log = 1;
+  string delimiter = 2;
+  int32 max_commits = 3;
+}
+
+message TypeCount {
+  string type = 1;
+  int32 count = 2;
+}
+
+message SummarizeCommitsResult {
+  int32 total = 1;
+  repeated TypeCount counts_by_type = 2;
+  repeated ConventionalCommit breaking_changes = 3;
+  // The highest-precedence release type implied by the whole set (major >
+  // minor > patch > none) — useful to decide one version bump for a batch.
+  string overall_release_type = 4;
+  int32 skipped = 5;
+  string error = 6;
+}
+
+message ValidateSubjectRequest {
+  string subject = 1;
+  // 0 = default (100, matching the common commitlint header-max-length).
+  int32 max_length = 2;
+}
+
+message ValidateSubjectResult {
+  bool valid = 1;
+  repeated ValidationIssue issues = 2;
+  int32 length = 3;
+}
