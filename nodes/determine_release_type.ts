@@ -5,11 +5,13 @@ import { parseRawCommit, computeBreaking, releaseTypeFor, errorMessage } from '.
 /**
  * Determine the semver release type a single commit implies: a breaking
  * change (marker or footer) -> "major", "feat" -> "minor", "fix" -> "patch",
- * anything else -> "none". `release_type` uses the same vocabulary as
- * semver-tools' Increment node's `release_type` field, so the two compose
- * directly: pipe this node's output straight into Increment to bump a
- * version from one commit. On an empty/oversized message, returns
- * release_type="none" with `reason` explaining why — never throws.
+ * anything else -> "none". The "major"/"minor"/"patch" values share
+ * semver-tools' Increment node's `release_type` vocabulary — but Increment's
+ * own release-type whitelist does NOT include "none", so a caller composing
+ * the two should branch on `release_type != "none"` before calling Increment
+ * (a commit that implies no release should simply not trigger a bump, not be
+ * passed through as an invalid release type). On an empty/oversized message,
+ * returns release_type="none" with `reason` explaining why — never throws.
  *
  * @param ax - Platform context: ax.log for logging, ax.secrets for secrets.
  */

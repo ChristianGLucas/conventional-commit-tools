@@ -1,46 +1,167 @@
 name: christiangeorgelucas/conventional-commit-tools
 version: 0.1.0
 language: typescript
+description: >-
+  Composable Axiom nodes for deterministic parsing, validation, and
+  structured extraction of Conventional Commits (v1.0.0,
+  https://www.conventionalcommits.org/en/v1.0.0/) formatted git commit
+  messages — type, scope, subject/body split, breaking-change marker/footer
+  detection, footer/trailer extraction, issue-reference extraction, semver
+  release-type inference, multi-commit log parsing and summarization, and
+  subject-line validation. Every node is a pure, stateless, deterministic
+  text-in/structured-out function: the commit message is always supplied by
+  the caller (no git repo access, no network, no wall-clock, no randomness).
+  A malformed or non-conventional message returns a structured result, never
+  a crash. Wraps the parsing engine of conventional-commits-parser (MIT, the
+  parser used by the conventional-changelog toolchain).
+author: Christian George Lucas
+license: MIT
+tags:
+  - conventional-commits
+  - git
+  - commit
+  - changelog
+  - semver
+  - release
+  - parsing
+  - validation
 nodes:
     - name: ParseCommit
       input: CommitMessageRequest
       output: ParseCommitResult
+      description: >-
+        Parse one raw commit message into its full structured representation:
+        type, scope, subject, body, footer trailers, breaking-change
+        marker/footer, issue references, @mentions, and revert info (if it is
+        a `Revert "..."` commit). `commit.header_matched` is false when the
+        header doesn't conform to Conventional Commits' "type(scope)!:
+        subject" form — every other field is still populated best-effort. `ok`
+        is false only for a hard input problem: an empty message, or one over
+        100,000 characters. Deterministic; never throws.
     - name: ValidateCommit
       input: ValidateCommitRequest
       output: ValidateCommitResult
+      description: >-
+        Validate a raw commit message against the Conventional Commits v1.0.0
+        specification and report exactly why it fails, if it does: header
+        format, missing/non-lowercase type (configurable via
+        `allow_any_type_case`), empty subject. A breaking commit with no
+        breaking-change description is a warning, not an error. `valid` is
+        true iff no error-severity issue was found; `commit` is always the
+        best-effort parse. Deterministic; never throws.
     - name: ExtractType
       input: CommitMessageRequest
       output: ExtractTypeResult
+      description: >-
+        Extract just the commit type (e.g. "feat", "fix", "docs", "chore",
+        "refactor", "test") from a raw commit message's header. `found` is
+        false when the header doesn't conform to Conventional Commits form, or
+        on an empty/oversized message — never throws.
     - name: ExtractScope
       input: CommitMessageRequest
       output: ExtractScopeResult
+      description: >-
+        Extract just the parenthesized scope (e.g. "api" from
+        "feat(api): ...") from a raw commit message's header. `found` is false
+        when the header has no scope, doesn't conform to Conventional Commits
+        form, or the message is empty/oversized — never throws.
     - name: DetectBreakingChange
       input: CommitMessageRequest
       output: DetectBreakingChangeResult
+      description: >-
+        Detect whether a raw commit message is a breaking change: either a
+        `!` immediately after the type/scope, or a `BREAKING CHANGE:` /
+        `BREAKING-CHANGE:` footer, per the Conventional Commits v1.0.0 spec.
+        `source` reports which signal(s) were present ("marker" | "footer" |
+        "both" | "none"); `description` is the breaking-change footer's text
+        if there is one. Never throws.
     - name: ExtractFooters
       input: CommitMessageRequest
       output: ExtractFootersResult
+      description: >-
+        Extract all footers/trailers from a raw commit message as
+        token/value pairs — e.g. "Reviewed-by: Alice", "Closes #123",
+        "BREAKING CHANGE: ...". A continuation line that doesn't start a new
+        trailer is folded into the previous trailer's value. Returns an empty
+        list (never throws) when there is no footer or the message is
+        empty/oversized.
     - name: ExtractIssueReferences
       input: CommitMessageRequest
       output: ExtractIssueReferencesResult
+      description: >-
+        Extract every issue/PR reference from a raw commit message — anywhere
+        in the header, body, or footer — e.g. "#123", "Closes #45", "fixes
+        octocat/hello-world#123". Each result carries the raw matched text,
+        the reference action if any, the issue number, the "#" prefix, and
+        owner/repository for the cross-repo form. Never throws.
     - name: DetermineReleaseType
       input: CommitMessageRequest
       output: DetermineReleaseTypeResult
+      description: >-
+        Determine the semver release type a single commit implies: a
+        breaking change (marker or footer) -> "major", "feat" -> "minor",
+        "fix" -> "patch", anything else -> "none". `release_type` uses the
+        same vocabulary as semver-tools' Increment node's `release_type`
+        input for "major"/"minor"/"patch" — a flow author should branch on
+        `release_type != "none"` before calling Increment, since Increment's
+        release-type whitelist does not include "none" (a commit that implies
+        no release should simply not trigger a bump). Never throws.
     - name: SplitHeaderBody
       input: CommitMessageRequest
       output: SplitHeaderBodyResult
+      description: >-
+        Split a raw commit message into its header (first line) and body
+        (everything after the first blank-line gap, trimmed) — a purely
+        structural split that works even on a non-conventional message,
+        unlike every other node in this package. An empty/oversized message
+        returns both fields empty. Never throws.
     - name: ParseRevert
       input: CommitMessageRequest
       output: ParseRevertResult
+      description: >-
+        Detect whether a raw commit message is a git-generated revert commit
+        (`Revert "<original header>"\n\nThis reverts commit <hash>.`) and, if
+        so, extract the original header and the reverted hash. `is_revert` is
+        false for an ordinary commit or an empty/oversized message. Never
+        throws.
     - name: ExtractMentions
       input: CommitMessageRequest
       output: ExtractMentionsResult
+      description: >-
+        Extract every @mention (e.g. "@octocat") anywhere in a raw commit
+        message — useful for crediting contributors/reviewers in generated
+        changelogs. Returns an empty list (never throws) on an
+        empty/oversized message.
     - name: ParseCommitLog
       input: ParseCommitLogRequest
       output: ParseCommitLogResult
+      description: >-
+        Parse a blob of multiple commit messages, separated by a
+        caller-supplied `delimiter` (required), into an array of structured
+        commits, in order. `max_commits` (<= 0 uses a default of 500) caps how
+        many fragments are parsed, hard-capped at 2000 regardless of what's
+        requested; the rest are counted in `skipped`. The log itself is
+        bounded at 2,000,000 characters. `error` is set only for a log-level
+        problem (empty delimiter, oversized log); a per-fragment parse
+        failure still yields a best-effort commit rather than being dropped.
+        Deterministic; never throws.
     - name: SummarizeCommits
       input: SummarizeCommitsRequest
       output: SummarizeCommitsResult
+      description: >-
+        Summarize a multi-commit log (same log/delimiter/max_commits contract
+        as ParseCommitLog) for changelog generation: total commits, a count
+        per commit type, the full list of breaking-change commits, and
+        `overall_release_type` — the highest-precedence release type implied
+        by the set (major > minor > patch > none), i.e. the one version bump
+        the whole batch would justify. Deterministic; never throws.
     - name: ValidateSubject
       input: ValidateSubjectRequest
       output: ValidateSubjectResult
+      description: >-
+        Validate a commit subject line against common, well-defined
+        mechanical rules — deliberately NOT imperative-mood (that requires
+        judgment, not a mechanical check): non-empty; not over `max_length`
+        (<= 0 uses the common commitlint default of 100); no leading/trailing
+        whitespace; no trailing period. A capitalized first letter is a
+        warning, not an error. Deterministic; never throws.

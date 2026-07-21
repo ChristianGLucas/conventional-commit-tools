@@ -230,10 +230,12 @@ export function computeBreaking(raw: RawCommit): { breaking: boolean; descriptio
 }
 
 /**
- * The semver release type a commit implies, using the same vocabulary as
- * semver-tools' Increment node (release_type = "major"/"minor"/"patch", plus
- * "none" for a commit that implies no release) so the two packages compose:
- * breaking -> major, feat -> minor, fix -> patch, everything else -> none.
+ * The semver release type a commit implies: breaking -> major, feat ->
+ * minor, fix -> patch, everything else -> none. "major"/"minor"/"patch"
+ * share semver-tools' Increment node's `release_type` vocabulary; "none" is
+ * this package's own sentinel for "no release" and is NOT in Increment's
+ * whitelist — a caller composing the two must branch on `release_type !=
+ * "none"` before calling Increment, not pass "none" straight through.
  */
 export function releaseTypeFor(type: string, breaking: boolean): { releaseType: string; reason: string } {
   if (breaking) return { releaseType: 'major', reason: 'breaking change' };

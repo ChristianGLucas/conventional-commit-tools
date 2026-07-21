@@ -30,7 +30,7 @@ why and how.
 | `DetectBreakingChange` | Detects a `!` marker and/or `BREAKING CHANGE:` footer, and the breaking description. |
 | `ExtractFooters` | Extracts every footer/trailer as token/value pairs. |
 | `ExtractIssueReferences` | Extracts every issue/PR reference (`#123`, `Closes #45`, `owner/repo#123`). |
-| `DetermineReleaseType` | Determines the semver release type a commit implies (`major`/`minor`/`patch`/`none`) — composes directly with `semver-tools`' `Increment` node. |
+| `DetermineReleaseType` | Determines the semver release type a commit implies (`major`/`minor`/`patch`/`none`) — the `major`/`minor`/`patch` values share `semver-tools`' `Increment` node's `release_type` vocabulary; branch on `release_type != "none"` before calling `Increment`, since `none` isn't in its whitelist. |
 | `ParseCommitLog` | Parses a delimiter-separated blob of multiple commit messages into structured commits. |
 | `SummarizeCommits` | Summarizes a multi-commit log for changelog generation: counts by type, breaking changes, overall release type. |
 | `SplitHeaderBody` | Splits any message (conventional or not) into header + body. |
