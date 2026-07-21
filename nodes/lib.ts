@@ -18,49 +18,49 @@
 //
 // conventional-commits-parser@7 ships ESM-only (package.json "type":
 // "module", exports map with no "require" condition) while this package
-// compiles to CommonJS (Axiom's frozen TS node signature/build). Two normal
-// approaches were tried and both failed for real, verified reasons before
-// landing on this one:
+// compiles to CommonJS (Axiom's frozen TS node signature/build). Three
+// approaches were tried and the first two failed for real, verified reasons
+// before landing on the one below:
 //   1. A static `import` compiles to `require()` under `module: "commonjs"`,
 //      which Node rejects with ERR_PACKAGE_PATH_NOT_EXPORTED (no "require"
 //      export condition).
 //   2. A dynamic `import()` hidden from TypeScript's CJS rewrite (via
 //      `new Function('s','return import(s)')`) DOES work under a plain
-//      `node` process (confirmed by hand) — but fails under `axiom test`'s
-//      Jest runner with "A dynamic import callback was invoked without
-//      --experimental-vm-modules", a Jest sandboxing limitation this
-//      package cannot configure around (`axiom test` invokes the jest
-//      binary directly, not through a package.json script where a
-//      NODE_OPTIONS override could be injected).
-// The fix that works in both the test runner and the deployed runtime:
-// `nodes/vendor/conventional-commits-parser/index.cjs` is CommitParser.js
-// (the ~450-line parsing engine this package actually uses — the class has
-// ZERO external dependencies of its own; only the package's separate
-// stream.js/CLI entry points pull in @simple-libs/stream-utils and
-// argue-cli, which this package never imports) rebuilt from the installed
+//      `node` process — but fails under `axiom test`'s Jest runner with "A
+//      dynamic import callback was invoked without --experimental-vm-modules"
+//      (a Jest sandboxing limitation this package cannot configure around:
+//      `axiom test` invokes the jest binary directly, not through a
+//      package.json script where a NODE_OPTIONS override could be injected).
+//   3. A vendored `.cjs` build of the library, require()'d directly, DOES
+//      work under both Jest and `axiom dev` — but the deployed build (the
+//      platform's Dockerfile, confirmed by reading its actual build log) runs
+//      `RUN npx tsc --outDir dist` directly, NOT `npm run build` — so a
+//      package.json build-script copy step is silently never invoked. `tsc`
+//      itself only emits files matched by tsconfig.json's `include` globs;
+//      a `.cjs` asset (whatever its location) is invisible to it and is
+//      therefore absent from `dist/`, and the deployed container
+//      crash-loops on `Cannot find module ... MODULE_NOT_FOUND` even though
+//      `axiom dev`/`axiom test` both passed locally (they run against the
+//      source tree directly, never through `dist/`).
+// The fix: the vendored build lives at
+// `nodes/vendor/conventional-commits-parser/index.js` — a plain `.js` file
+// (not `.cjs`) so it is matched by tsconfig's `nodes/**/*.js` include glob
+// (added alongside `nodes/**/*.ts`) and `allowJs: true` — `tsc` therefore
+// compiles/emits it into `dist/nodes/vendor/.../index.js` like any other
+// source file, through the exact same mechanism that reliably ships every
+// other node. No custom build step, no copy script, nothing the platform's
+// fixed `npx tsc --outDir dist` command doesn't already do for free. It is
+// `require()`-d directly below like any ordinary CJS dependency — no
+// dynamic import, no async voodoo. `index.js` is CommitParser.js (the
+// ~450-line parsing engine this package actually uses — the class has ZERO
+// external dependencies of its own; only the package's separate stream.js/
+// CLI entry points pull in @simple-libs/stream-utils and argue-cli, which
+// this package never imports) rebuilt from the installed
 // conventional-commits-parser@7.1.0 into plain CommonJS with `esbuild
 // --bundle --format=cjs` — a pure module-format transpile, not a rewrite:
 // every line of parsing logic is byte-for-byte the same algorithm, just
 // syntactically CommonJS instead of ESM. The upstream MIT LICENSE.md is
-// copied alongside it for attribution. This is `require()`-d directly below
-// like any ordinary CJS dependency — no dynamic import, no async voodoo,
-// works identically under Jest and `axiom dev`.
-//
-// SHARP EDGE, verified against the actual deployed container's crash log
-// (Error: Cannot find module './vendor/conventional-commits-parser/index.cjs',
-// require stack dist/nodes/lib.js -> dist/service.js, code MODULE_NOT_FOUND):
-// the deployed build's `npm run build` runs `tsc`, which ONLY compiles files
-// matched by tsconfig.json's `include` glob (`nodes/**/*.ts` etc.) from
-// nodes/ into dist/nodes/ — it does not copy non-.ts assets. A vendored
-// `.cjs` file living under nodes/ (or anywhere else) is therefore silently
-// absent from `dist/` even though `axiom dev`/`axiom test` both worked
-// locally (they run against the source tree directly, never through
-// `dist/`), so this gap is invisible until the deployed container actually
-// starts and crash-loops. The fix: package.json's `build` script now also
-// copies `nodes/vendor/` into `dist/nodes/vendor/` after `tsc` — see
-// package.json. Verified by running `npm run build` by hand and confirming
-// `dist/nodes/vendor/conventional-commits-parser/index.cjs` exists and
-// `require('./dist/nodes/lib.js').parseRawCommit(...)` actually works.
+// copied alongside it for attribution (see NOTICE.md in that directory).
 import {
   ConventionalCommit,
   Footer,
@@ -74,7 +74,7 @@ interface CommitParserInstance {
 type CommitParserCtor = new (options: Record<string, unknown>) => CommitParserInstance;
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { CommitParser } = require('./vendor/conventional-commits-parser/index.cjs') as {
+const { CommitParser } = require('./vendor/conventional-commits-parser/index.js') as {
   CommitParser: CommitParserCtor;
 };
 

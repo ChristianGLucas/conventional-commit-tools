@@ -1,6 +1,6 @@
 # Vendored: conventional-commits-parser (CommitParser only), CJS build
 
-`index.cjs` in this directory is the parsing engine of
+`index.js` in this directory is the parsing engine of
 [`conventional-commits-parser`](https://www.npmjs.com/package/conventional-commits-parser)
 version **7.1.0** (MIT, © the conventional-changelog team — see `LICENSE.md`
 alongside this file), rebuilt from ESM into plain CommonJS.
@@ -9,20 +9,38 @@ alongside this file), rebuilt from ESM into plain CommonJS.
 
 `conventional-commits-parser@7` ships ESM-only (`"type": "module"`, an
 `exports` map with no `"require"` condition). This package compiles to
-CommonJS (Axiom's frozen TypeScript node signature/build target), and:
+CommonJS (Axiom's frozen TypeScript node signature/build target). Three
+approaches were tried, in order:
 
-- A static `import` of the package compiles to `require()` under
-  `module: "commonjs"`, which Node then rejects with
-  `ERR_PACKAGE_PATH_NOT_EXPORTED` — confirmed by hand.
-- A dynamic `import()` hidden from TypeScript's rewrite (via
-  `new Function('s', 'return import(s)')`) works under a plain `node`
-  process, but fails under `axiom test`'s Jest runner with "A dynamic
-  import callback was invoked without --experimental-vm-modules" — a Jest
-  sandboxing limitation that can't be configured around here, since
-  `axiom test` invokes the `jest` binary directly rather than through a
-  package.json script where a `NODE_OPTIONS` override could be injected.
+1. A static `import` of the package compiles to `require()` under
+   `module: "commonjs"`, which Node then rejects with
+   `ERR_PACKAGE_PATH_NOT_EXPORTED` — confirmed by hand.
+2. A dynamic `import()` hidden from TypeScript's rewrite (via
+   `new Function('s', 'return import(s)')`) works under a plain `node`
+   process, but fails under `axiom test`'s Jest runner with "A dynamic
+   import callback was invoked without --experimental-vm-modules" — a Jest
+   sandboxing limitation that can't be configured around here, since
+   `axiom test` invokes the `jest` binary directly rather than through a
+   package.json script where a `NODE_OPTIONS` override could be injected.
+3. Vendoring a `.cjs` build and `require()`-ing it directly worked under
+   both Jest and `axiom dev` — but **not** deployed: the platform's actual
+   Dockerfile (confirmed by reading its build log after a live push) runs
+   `RUN npx tsc --outDir dist` directly, not `npm run build`, so a
+   package.json build-script copy step never executes. `tsc` only emits
+   files matched by `tsconfig.json`'s `include` globs; a `.cjs` file is
+   invisible to it regardless of where it lives, so it was silently absent
+   from `dist/` and the deployed container crash-looped on
+   `Cannot find module ... MODULE_NOT_FOUND` — invisible locally because
+   `axiom dev`/`axiom test` both run against the source tree directly,
+   never through `dist/`.
 
-So this package vendors the one class it actually uses instead.
+**The fix that actually works everywhere:** this file is named `index.js`
+(not `.cjs`) and `../../../tsconfig.json`'s `include` list has
+`nodes/**/*.js` added alongside `nodes/**/*.ts` (with `allowJs: true`
+already set) — so `tsc` compiles and emits it into `dist/nodes/vendor/...`
+through the *exact same mechanism* that ships every other node, with zero
+custom build steps. This is the only approach that survives the platform's
+actual fixed build command.
 
 ## How it was built (reproducible)
 
@@ -30,7 +48,7 @@ So this package vendors the one class it actually uses instead.
 npm install conventional-commits-parser@7.1.0   # into a scratch dir
 npx esbuild node_modules/conventional-commits-parser/dist/CommitParser.js \
   --bundle --platform=node --format=cjs --target=node18 \
-  --outfile=vendor/conventional-commits-parser/index.cjs
+  --outfile=nodes/vendor/conventional-commits-parser/index.js
 ```
 
 This is a **module-format transpile only** — every line of parsing logic
@@ -51,4 +69,4 @@ runtime dependency of `conventional-commit-tools` at all.
 
 If conventional-commits-parser publishes a new version worth picking up,
 re-run the build command above against the new version and diff the
-output — do not hand-edit `index.cjs`.
+output — do not hand-edit `index.js`.
