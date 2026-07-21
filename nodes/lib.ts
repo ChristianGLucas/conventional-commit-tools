@@ -33,18 +33,25 @@
 //      binary directly, not through a package.json script where a
 //      NODE_OPTIONS override could be injected).
 // The fix that works in both the test runner and the deployed runtime:
-// `vendor/conventional-commits-parser/index.cjs` is CommitParser.js (the
-// ~450-line parsing engine this package actually uses — the class has ZERO
-// external dependencies of its own; only the package's separate stream.js/
-// CLI entry points pull in @simple-libs/stream-utils and argue-cli, which
-// this package never imports) rebuilt from the installed
+// `nodes/vendor/conventional-commits-parser/index.cjs` is CommitParser.js
+// (the ~450-line parsing engine this package actually uses — the class has
+// ZERO external dependencies of its own; only the package's separate
+// stream.js/CLI entry points pull in @simple-libs/stream-utils and
+// argue-cli, which this package never imports) rebuilt from the installed
 // conventional-commits-parser@7.1.0 into plain CommonJS with `esbuild
 // --bundle --format=cjs` — a pure module-format transpile, not a rewrite:
 // every line of parsing logic is byte-for-byte the same algorithm, just
 // syntactically CommonJS instead of ESM. The upstream MIT LICENSE.md is
 // copied alongside it for attribution. This is `require()`-d directly below
 // like any ordinary CJS dependency — no dynamic import, no async voodoo,
-// works identically under Jest, `axiom dev`, and the deployed sidecar.
+// works identically under Jest and `axiom dev`. It lives INSIDE nodes/ (not
+// as a package-root sibling directory) deliberately: a first attempt placed
+// it at the package root (vendor/…) and the deployed build shipped it fine
+// under `axiom dev`/`axiom test` locally but the deployed sidecar 502'd
+// every node with "produced zero addresses" (a crash-looping container) —
+// the server-side build only reliably packages what's under nodes/, gen/,
+// and messages/, not arbitrary package-root directories. Confirmed by
+// moving it here and re-deploying.
 import {
   ConventionalCommit,
   Footer,
@@ -58,7 +65,7 @@ interface CommitParserInstance {
 type CommitParserCtor = new (options: Record<string, unknown>) => CommitParserInstance;
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { CommitParser } = require('../vendor/conventional-commits-parser/index.cjs') as {
+const { CommitParser } = require('./vendor/conventional-commits-parser/index.cjs') as {
   CommitParser: CommitParserCtor;
 };
 
