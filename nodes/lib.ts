@@ -44,14 +44,23 @@
 // syntactically CommonJS instead of ESM. The upstream MIT LICENSE.md is
 // copied alongside it for attribution. This is `require()`-d directly below
 // like any ordinary CJS dependency — no dynamic import, no async voodoo,
-// works identically under Jest and `axiom dev`. It lives INSIDE nodes/ (not
-// as a package-root sibling directory) deliberately: a first attempt placed
-// it at the package root (vendor/…) and the deployed build shipped it fine
-// under `axiom dev`/`axiom test` locally but the deployed sidecar 502'd
-// every node with "produced zero addresses" (a crash-looping container) —
-// the server-side build only reliably packages what's under nodes/, gen/,
-// and messages/, not arbitrary package-root directories. Confirmed by
-// moving it here and re-deploying.
+// works identically under Jest and `axiom dev`.
+//
+// SHARP EDGE, verified against the actual deployed container's crash log
+// (Error: Cannot find module './vendor/conventional-commits-parser/index.cjs',
+// require stack dist/nodes/lib.js -> dist/service.js, code MODULE_NOT_FOUND):
+// the deployed build's `npm run build` runs `tsc`, which ONLY compiles files
+// matched by tsconfig.json's `include` glob (`nodes/**/*.ts` etc.) from
+// nodes/ into dist/nodes/ — it does not copy non-.ts assets. A vendored
+// `.cjs` file living under nodes/ (or anywhere else) is therefore silently
+// absent from `dist/` even though `axiom dev`/`axiom test` both worked
+// locally (they run against the source tree directly, never through
+// `dist/`), so this gap is invisible until the deployed container actually
+// starts and crash-loops. The fix: package.json's `build` script now also
+// copies `nodes/vendor/` into `dist/nodes/vendor/` after `tsc` — see
+// package.json. Verified by running `npm run build` by hand and confirming
+// `dist/nodes/vendor/conventional-commits-parser/index.cjs` exists and
+// `require('./dist/nodes/lib.js').parseRawCommit(...)` actually works.
 import {
   ConventionalCommit,
   Footer,

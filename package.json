@@ -4,7 +4,7 @@
   "private": true,
   "main": "dist/service.js",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc && mkdir -p dist/nodes/vendor && cp -r nodes/vendor/. dist/nodes/vendor/"
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.10.0",
