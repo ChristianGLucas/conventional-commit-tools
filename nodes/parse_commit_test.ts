@@ -85,15 +85,6 @@ describe('ParseCommit', () => {
     expect(result.getOk()).toBe(false);
   });
 
-  it('returns ok=false with a structured error for an oversized message, never throws', () => {
-    const input = new CommitMessageRequest();
-    input.setMessage('feat: ' + 'a'.repeat(200_000));
-    expect(() => parseCommit(ctx, input)).not.toThrow();
-    const result = parseCommit(ctx, input);
-    expect(result.getOk()).toBe(false);
-    expect(result.getError()).toMatch(/longer than/);
-  });
-
   it('is deterministic: calling twice with the same input yields identical output', () => {
     const input = new CommitMessageRequest();
     input.setMessage('feat(api)!: remove legacy endpoint\n\nBREAKING CHANGE: gone');

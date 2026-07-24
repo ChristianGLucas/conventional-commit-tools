@@ -9,7 +9,7 @@ import { parseRawCommit, parseFooters } from './lib';
  * "BREAKING CHANGE: ..." -> {token: "BREAKING CHANGE", value: "..."}. A
  * continuation line that doesn't start a new trailer is folded into the
  * previous trailer's value. Returns an empty list (never throws) when the
- * message has no footer, or is empty/oversized.
+ * message has no footer, or is empty.
  *
  * @param ax - Platform context: ax.log for logging, ax.secrets for secrets.
  */

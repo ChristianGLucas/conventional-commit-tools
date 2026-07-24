@@ -34,13 +34,4 @@ describe('SplitHeaderBody', () => {
     expect(result.getHeader()).toBe('feat: add a thing');
     expect(result.getBody()).toBe('body text');
   });
-
-  it('returns empty header/body, not a crash, for an oversized message', () => {
-    const input = new CommitMessageRequest();
-    input.setMessage('a'.repeat(200_000));
-    expect(() => splitHeaderBody(ctx, input)).not.toThrow();
-    const result = splitHeaderBody(ctx, input);
-    expect(result.getHeader()).toBe('');
-    expect(result.getBody()).toBe('');
-  });
 });

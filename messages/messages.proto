@@ -145,22 +145,17 @@ message ExtractMentionsResult {
 message ParseCommitLogRequest {
   string log = 1;
   string delimiter = 2;
-  // 0 = default cap (500). Always hard-capped at 2000 regardless of the value
-  // supplied; excess commits are counted in `skipped`, not parsed.
-  int32 max_commits = 3;
 }
 
 message ParseCommitLogResult {
   repeated ConventionalCommit commits = 1;
   int32 count = 2;
-  int32 skipped = 3;
   string error = 4;
 }
 
 message SummarizeCommitsRequest {
   string log = 1;
   string delimiter = 2;
-  int32 max_commits = 3;
 }
 
 message TypeCount {
@@ -175,7 +170,6 @@ message SummarizeCommitsResult {
   // The highest-precedence release type implied by the whole set (major >
   // minor > patch > none) — useful to decide one version bump for a batch.
   string overall_release_type = 4;
-  int32 skipped = 5;
   string error = 6;
 }
 

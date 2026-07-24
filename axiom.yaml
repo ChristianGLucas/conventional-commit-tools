@@ -36,8 +36,8 @@ nodes:
         a `Revert "..."` commit). `commit.header_matched` is false when the
         header doesn't conform to Conventional Commits' "type(scope)!:
         subject" form — every other field is still populated best-effort. `ok`
-        is false only for a hard input problem: an empty message, or one over
-        100,000 characters. Deterministic; never throws.
+        is false only for a hard input problem: an empty message. Deterministic;
+        never throws.
     - name: ValidateCommit
       input: ValidateCommitRequest
       output: ValidateCommitResult
@@ -56,7 +56,7 @@ nodes:
         Extract just the commit type (e.g. "feat", "fix", "docs", "chore",
         "refactor", "test") from a raw commit message's header. `found` is
         false when the header doesn't conform to Conventional Commits form, or
-        on an empty/oversized message — never throws.
+        on an empty message — never throws.
     - name: ExtractScope
       input: CommitMessageRequest
       output: ExtractScopeResult
@@ -64,7 +64,7 @@ nodes:
         Extract just the parenthesized scope (e.g. "api" from
         "feat(api): ...") from a raw commit message's header. `found` is false
         when the header has no scope, doesn't conform to Conventional Commits
-        form, or the message is empty/oversized — never throws.
+        form, or the message is empty — never throws.
     - name: DetectBreakingChange
       input: CommitMessageRequest
       output: DetectBreakingChangeResult
@@ -84,7 +84,7 @@ nodes:
         "BREAKING CHANGE: ...". A continuation line that doesn't start a new
         trailer is folded into the previous trailer's value. Returns an empty
         list (never throws) when there is no footer or the message is
-        empty/oversized.
+        empty.
     - name: ExtractIssueReferences
       input: CommitMessageRequest
       output: ExtractIssueReferencesResult
@@ -113,7 +113,7 @@ nodes:
         Split a raw commit message into its header (first line) and body
         (everything after the first blank-line gap, trimmed) — a purely
         structural split that works even on a non-conventional message,
-        unlike every other node in this package. An empty/oversized message
+        unlike every other node in this package. An empty message
         returns both fields empty. Never throws.
     - name: ParseRevert
       input: CommitMessageRequest
@@ -122,7 +122,7 @@ nodes:
         Detect whether a raw commit message is a git-generated revert commit
         (`Revert "<original header>"\n\nThis reverts commit <hash>.`) and, if
         so, extract the original header and the reverted hash. `is_revert` is
-        false for an ordinary commit or an empty/oversized message. Never
+        false for an ordinary commit or an empty message. Never
         throws.
     - name: ExtractMentions
       input: CommitMessageRequest
@@ -131,25 +131,22 @@ nodes:
         Extract every @mention (e.g. "@octocat") anywhere in a raw commit
         message — useful for crediting contributors/reviewers in generated
         changelogs. Returns an empty list (never throws) on an
-        empty/oversized message.
+        empty message.
     - name: ParseCommitLog
       input: ParseCommitLogRequest
       output: ParseCommitLogResult
       description: >-
         Parse a blob of multiple commit messages, separated by a
         caller-supplied `delimiter` (required), into an array of structured
-        commits, in order. `max_commits` (<= 0 uses a default of 500) caps how
-        many fragments are parsed, hard-capped at 2000 regardless of what's
-        requested; the rest are counted in `skipped`. The log itself is
-        bounded at 2,000,000 characters. `error` is set only for a log-level
-        problem (empty delimiter, oversized log); a per-fragment parse
+        commits, in order. `error` is set only for a log-level
+        problem (empty delimiter); a per-fragment parse
         failure still yields a best-effort commit rather than being dropped.
         Deterministic; never throws.
     - name: SummarizeCommits
       input: SummarizeCommitsRequest
       output: SummarizeCommitsResult
       description: >-
-        Summarize a multi-commit log (same log/delimiter/max_commits contract
+        Summarize a multi-commit log (same log/delimiter contract
         as ParseCommitLog) for changelog generation: total commits, a count
         per commit type, the full list of breaking-change commits, and
         `overall_release_type` — the highest-precedence release type implied

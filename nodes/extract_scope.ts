@@ -6,7 +6,7 @@ import { parseRawCommit } from './lib';
  * Extract just the parenthesized scope (e.g. "api" from "feat(api): ...")
  * from a raw commit message's header. `found` is false (with `scope` empty)
  * when the header has no scope, doesn't conform to "type(scope)!: subject"
- * at all, or the message is empty/oversized — never throws.
+ * at all, or the message is empty — never throws.
  *
  * @param ax - Platform context: ax.log for logging, ax.secrets for secrets.
  */

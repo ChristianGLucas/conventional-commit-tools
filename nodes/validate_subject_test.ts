@@ -61,13 +61,4 @@ describe('ValidateSubject', () => {
     expect(warning).toBeDefined();
     expect(warning!.getSeverity()).toBe('warning');
   });
-
-  it('is invalid, not a crash, for a subject far exceeding the hard bound', () => {
-    const input = new ValidateSubjectRequest();
-    input.setSubject('a'.repeat(30_000));
-    expect(() => validateSubject(ctx, input)).not.toThrow();
-    const result = validateSubject(ctx, input);
-    expect(result.getValid()).toBe(false);
-    expect(result.getIssuesList().map((i) => i.getCode())).toContain('SUBJECT_TOO_LARGE');
-  });
 });

@@ -5,7 +5,7 @@ import { parseRawCommit } from './lib';
 /**
  * Extract every @mention (e.g. "@octocat") anywhere in a raw commit message
  * — useful for crediting contributors/reviewers in generated changelogs.
- * Returns an empty list (never throws) on an empty/oversized message.
+ * Returns an empty list (never throws) on an empty message.
  *
  * @param ax - Platform context: ax.log for logging, ax.secrets for secrets.
  */

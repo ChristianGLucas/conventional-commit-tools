@@ -78,39 +78,9 @@ const { CommitParser } = require('./vendor/conventional-commits-parser/index.js'
   CommitParser: CommitParserCtor;
 };
 
-/** Ceiling for a single raw commit message. Real commit messages (even a
- * verbose one with a full body and several footers) are well under a few KB;
- * this leaves generous headroom while still bounding parse cost on the raw
- * input, before any regex work runs. */
-export const MAX_MESSAGE_CHARS = 100_000;
-
-/** Ceiling for a multi-commit log blob (ParseCommitLog / SummarizeCommits). */
-export const MAX_LOG_CHARS = 2_000_000;
-
-/** Default cap on how many commits ParseCommitLog/SummarizeCommits will
- * parse when the caller passes max_commits <= 0. */
-export const DEFAULT_MAX_COMMITS = 500;
-
-/** Absolute cap on commits parsed per call, regardless of what the caller
- * requests via max_commits — protects against an adversarially large
- * max_commits value driving unbounded work. */
-export const HARD_MAX_COMMITS = 2000;
-
 /** Default subject max length, matching commitlint's common
  * header-max-length convention. */
 export const DEFAULT_SUBJECT_MAX_LENGTH = 100;
-
-/** Defense-in-depth ceiling on a single subject string, independent of the
- * caller-supplied max_length (which only controls the *validation* rule). */
-export const MAX_SUBJECT_CHARS = 20_000;
-
-export class BoundsError extends Error {}
-
-export function checkMessageLen(message: string): void {
-  if (message.length > MAX_MESSAGE_CHARS) {
-    throw new BoundsError(`message is longer than ${MAX_MESSAGE_CHARS} characters`);
-  }
-}
 
 export function errorMessage(e: unknown, context: string): string {
   if (e instanceof Error) {
@@ -176,14 +146,12 @@ export interface RawCommit {
 
 /**
  * Parse one raw commit message with the shared, spec-configured
- * CommitParser. Throws BoundsError on an oversized message and a plain Error
- * ("empty commit message") on blank input — conventional-commits-parser
- * itself throws a bare TypeError on blank input; this normalizes both cases
- * so every node's catch block produces one consistent, structured failure
+ * CommitParser. Throws a plain Error ("empty commit message") on blank
+ * input — conventional-commits-parser itself throws a bare TypeError on
+ * blank input; this normalizes that into one consistent, structured failure
  * mode instead of leaking the library's own exception type.
  */
 export function parseRawCommit(message: string): RawCommit {
-  checkMessageLen(message);
   if (!message.trim()) {
     throw new Error('empty commit message');
   }
@@ -304,9 +272,9 @@ export function toConventionalCommit(raw: RawCommit): ConventionalCommit {
 }
 
 /** Best-effort ConventionalCommit for a fragment that failed to parse (e.g.
- * a blank fragment surviving the split, or one exceeding MAX_MESSAGE_CHARS)
- * inside a multi-commit log — keeps ParseCommitLog/SummarizeCommits at
- * "structured result, never throws" even per-fragment. */
+ * a blank fragment surviving the split) inside a multi-commit log — keeps
+ * ParseCommitLog/SummarizeCommits at "structured result, never throws" even
+ * per-fragment. */
 export function placeholderCommit(fragment: string): ConventionalCommit {
   const c = new ConventionalCommit();
   c.setHeader((fragment.split(/\r?\n/)[0] ?? '').slice(0, 500));
@@ -316,27 +284,15 @@ export function placeholderCommit(fragment: string): ConventionalCommit {
 
 /**
  * Split a multi-commit log blob on a caller-supplied delimiter into
- * individual commit-message fragments, bounded on both total log size and
- * commit count. `max_commits <= 0` uses DEFAULT_MAX_COMMITS; any requested
- * value is clamped to HARD_MAX_COMMITS regardless, and fragments beyond the
- * cap are counted in `skipped`, not parsed.
+ * individual commit-message fragments.
  */
-export function splitLog(
-  log: string,
-  delimiter: string,
-  maxCommits: number,
-): { messages: string[]; skipped: number; error?: string } {
-  if (log.length > MAX_LOG_CHARS) {
-    return { messages: [], skipped: 0, error: `log is longer than ${MAX_LOG_CHARS} characters` };
-  }
+export function splitLog(log: string, delimiter: string): { messages: string[]; error?: string } {
   if (!delimiter) {
-    return { messages: [], skipped: 0, error: 'delimiter must not be empty' };
+    return { messages: [], error: 'delimiter must not be empty' };
   }
-  const cap = maxCommits > 0 ? Math.min(maxCommits, HARD_MAX_COMMITS) : DEFAULT_MAX_COMMITS;
-  const parts = log
+  const messages = log
     .split(delimiter)
     .map((s) => s.trim())
     .filter((s) => s.length > 0);
-  const messages = parts.slice(0, cap);
-  return { messages, skipped: parts.length - messages.length };
+  return { messages };
 }

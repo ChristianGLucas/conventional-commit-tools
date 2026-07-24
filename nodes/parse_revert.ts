@@ -7,7 +7,7 @@ import { parseRawCommit } from './lib';
  * (`Revert "<original header>"\n\nThis reverts commit <hash>.`) and, if so,
  * extract the original commit's header and the reverted commit's hash.
  * `is_revert` is false (with the other fields empty) for an ordinary commit,
- * or on an empty/oversized message — never throws.
+ * or on an empty message — never throws.
  *
  * @param ax - Platform context: ax.log for logging, ax.secrets for secrets.
  */

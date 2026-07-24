@@ -1,6 +1,6 @@
 import { ValidateSubjectRequest, ValidateSubjectResult, ValidationIssue } from '../gen/messages_pb';
 import { AxiomContext } from '../gen/axiomContext';
-import { mkIssue, DEFAULT_SUBJECT_MAX_LENGTH, MAX_SUBJECT_CHARS } from './lib';
+import { mkIssue, DEFAULT_SUBJECT_MAX_LENGTH } from './lib';
 
 /**
  * Validate a commit subject line (the description after "type(scope): ")
@@ -19,12 +19,6 @@ export function validateSubject(ax: AxiomContext, input: ValidateSubjectRequest)
   const out = new ValidateSubjectResult();
   const subject = input.getSubject();
   out.setLength(subject.length);
-
-  if (subject.length > MAX_SUBJECT_CHARS) {
-    out.setValid(false);
-    out.setIssuesList([mkIssue('SUBJECT_TOO_LARGE', `subject is longer than ${MAX_SUBJECT_CHARS} characters`, 'error')]);
-    return out;
-  }
 
   const maxLength = input.getMaxLength() > 0 ? input.getMaxLength() : DEFAULT_SUBJECT_MAX_LENGTH;
   const trimmed = subject.trim();

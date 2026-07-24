@@ -10,8 +10,8 @@ import { parseRawCommit, computeBreaking, releaseTypeFor, errorMessage } from '.
  * own release-type whitelist does NOT include "none", so a caller composing
  * the two should branch on `release_type != "none"` before calling Increment
  * (a commit that implies no release should simply not trigger a bump, not be
- * passed through as an invalid release type). On an empty/oversized message,
- * returns release_type="none" with `reason` explaining why — never throws.
+ * passed through as an invalid release type). On an empty message, returns
+ * release_type="none" with `reason` explaining why — never throws.
  *
  * @param ax - Platform context: ax.log for logging, ax.secrets for secrets.
  */

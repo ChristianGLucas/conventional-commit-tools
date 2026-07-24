@@ -12,8 +12,7 @@ import { parseRawCommit, toConventionalCommit, errorMessage } from './lib';
  * underlying parser (conventional-commits-parser) could extract, so a
  * non-conventional message still returns useful structure. `ok` is false
  * (with `error` set and `commit` at its zero value) only for a hard input
- * problem: an empty message, or one over the 100,000-character bound.
- * Deterministic; never throws.
+ * problem: an empty message. Deterministic; never throws.
  *
  * @param ax - Platform context: ax.log for logging, ax.secrets for secrets.
  */

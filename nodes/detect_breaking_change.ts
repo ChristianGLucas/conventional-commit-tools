@@ -8,8 +8,8 @@ import { parseRawCommit, computeBreaking } from './lib';
  * `BREAKING CHANGE:` / `BREAKING-CHANGE:` footer, per the Conventional
  * Commits v1.0.0 spec. `source` reports which signal(s) were present
  * ("marker" | "footer" | "both" | "none"); `description` is the breaking
- * -change footer's text if there is one, else empty. An empty/oversized
- * message yields breaking=false, source="none" — never throws.
+ * -change footer's text if there is one, else empty. An empty message
+ * yields breaking=false, source="none" — never throws.
  *
  * @param ax - Platform context: ax.log for logging, ax.secrets for secrets.
  */

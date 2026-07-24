@@ -9,7 +9,7 @@ import { parseRawCommit } from './lib';
  * reference action if one preceded it ("Closes", "Fixes", "Resolves", ...,
  * empty if none), the issue number, the "#" prefix, and owner/repository if
  * the reference used the "owner/repo#N" cross-repo form. Returns an empty
- * list (never throws) on an empty/oversized message.
+ * list (never throws) on an empty message.
  *
  * @param ax - Platform context: ax.log for logging, ax.secrets for secrets.
  */

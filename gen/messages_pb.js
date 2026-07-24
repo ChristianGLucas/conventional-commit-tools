@@ -4102,8 +4102,7 @@ proto.christiangeorgelucas.conventional_commit_tools.ParseCommitLogRequest.proto
 proto.christiangeorgelucas.conventional_commit_tools.ParseCommitLogRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
 log: jspb.Message.getFieldWithDefault(msg, 1, ""),
-delimiter: jspb.Message.getFieldWithDefault(msg, 2, ""),
-maxCommits: jspb.Message.getFieldWithDefault(msg, 3, 0)
+delimiter: jspb.Message.getFieldWithDefault(msg, 2, "")
   };
 
   if (includeInstance) {
@@ -4148,10 +4147,6 @@ proto.christiangeorgelucas.conventional_commit_tools.ParseCommitLogRequest.deser
       var value = /** @type {string} */ (reader.readString());
       msg.setDelimiter(value);
       break;
-    case 3:
-      var value = /** @type {number} */ (reader.readInt32());
-      msg.setMaxCommits(value);
-      break;
     default:
       reader.skipField();
       break;
@@ -4195,13 +4190,6 @@ proto.christiangeorgelucas.conventional_commit_tools.ParseCommitLogRequest.seria
       f
     );
   }
-  f = message.getMaxCommits();
-  if (f !== 0) {
-    writer.writeInt32(
-      3,
-      f
-    );
-  }
 };
 
 
@@ -4238,24 +4226,6 @@ proto.christiangeorgelucas.conventional_commit_tools.ParseCommitLogRequest.proto
  */
 proto.christiangeorgelucas.conventional_commit_tools.ParseCommitLogRequest.prototype.setDelimiter = function(value) {
   return jspb.Message.setProto3StringField(this, 2, value);
-};
-
-
-/**
- * optional int32 max_commits = 3;
- * @return {number}
- */
-proto.christiangeorgelucas.conventional_commit_tools.ParseCommitLogRequest.prototype.getMaxCommits = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 3, 0));
-};
-
-
-/**
- * @param {number} value
- * @return {!proto.christiangeorgelucas.conventional_commit_tools.ParseCommitLogRequest} returns this
- */
-proto.christiangeorgelucas.conventional_commit_tools.ParseCommitLogRequest.prototype.setMaxCommits = function(value) {
-  return jspb.Message.setProto3IntField(this, 3, value);
 };
 
 
@@ -4301,7 +4271,6 @@ proto.christiangeorgelucas.conventional_commit_tools.ParseCommitLogResult.toObje
 commitsList: jspb.Message.toObjectList(msg.getCommitsList(),
     proto.christiangeorgelucas.conventional_commit_tools.ConventionalCommit.toObject, includeInstance),
 count: jspb.Message.getFieldWithDefault(msg, 2, 0),
-skipped: jspb.Message.getFieldWithDefault(msg, 3, 0),
 error: jspb.Message.getFieldWithDefault(msg, 4, "")
   };
 
@@ -4348,10 +4317,6 @@ proto.christiangeorgelucas.conventional_commit_tools.ParseCommitLogResult.deseri
       var value = /** @type {number} */ (reader.readInt32());
       msg.setCount(value);
       break;
-    case 3:
-      var value = /** @type {number} */ (reader.readInt32());
-      msg.setSkipped(value);
-      break;
     case 4:
       var value = /** @type {string} */ (reader.readString());
       msg.setError(value);
@@ -4397,13 +4362,6 @@ proto.christiangeorgelucas.conventional_commit_tools.ParseCommitLogResult.serial
   if (f !== 0) {
     writer.writeInt32(
       2,
-      f
-    );
-  }
-  f = message.getSkipped();
-  if (f !== 0) {
-    writer.writeInt32(
-      3,
       f
     );
   }
@@ -4474,24 +4432,6 @@ proto.christiangeorgelucas.conventional_commit_tools.ParseCommitLogResult.protot
 
 
 /**
- * optional int32 skipped = 3;
- * @return {number}
- */
-proto.christiangeorgelucas.conventional_commit_tools.ParseCommitLogResult.prototype.getSkipped = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 3, 0));
-};
-
-
-/**
- * @param {number} value
- * @return {!proto.christiangeorgelucas.conventional_commit_tools.ParseCommitLogResult} returns this
- */
-proto.christiangeorgelucas.conventional_commit_tools.ParseCommitLogResult.prototype.setSkipped = function(value) {
-  return jspb.Message.setProto3IntField(this, 3, value);
-};
-
-
-/**
  * optional string error = 4;
  * @return {string}
  */
@@ -4542,8 +4482,7 @@ proto.christiangeorgelucas.conventional_commit_tools.SummarizeCommitsRequest.pro
 proto.christiangeorgelucas.conventional_commit_tools.SummarizeCommitsRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
 log: jspb.Message.getFieldWithDefault(msg, 1, ""),
-delimiter: jspb.Message.getFieldWithDefault(msg, 2, ""),
-maxCommits: jspb.Message.getFieldWithDefault(msg, 3, 0)
+delimiter: jspb.Message.getFieldWithDefault(msg, 2, "")
   };
 
   if (includeInstance) {
@@ -4588,10 +4527,6 @@ proto.christiangeorgelucas.conventional_commit_tools.SummarizeCommitsRequest.des
       var value = /** @type {string} */ (reader.readString());
       msg.setDelimiter(value);
       break;
-    case 3:
-      var value = /** @type {number} */ (reader.readInt32());
-      msg.setMaxCommits(value);
-      break;
     default:
       reader.skipField();
       break;
@@ -4635,13 +4570,6 @@ proto.christiangeorgelucas.conventional_commit_tools.SummarizeCommitsRequest.ser
       f
     );
   }
-  f = message.getMaxCommits();
-  if (f !== 0) {
-    writer.writeInt32(
-      3,
-      f
-    );
-  }
 };
 
 
@@ -4678,24 +4606,6 @@ proto.christiangeorgelucas.conventional_commit_tools.SummarizeCommitsRequest.pro
  */
 proto.christiangeorgelucas.conventional_commit_tools.SummarizeCommitsRequest.prototype.setDelimiter = function(value) {
   return jspb.Message.setProto3StringField(this, 2, value);
-};
-
-
-/**
- * optional int32 max_commits = 3;
- * @return {number}
- */
-proto.christiangeorgelucas.conventional_commit_tools.SummarizeCommitsRequest.prototype.getMaxCommits = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 3, 0));
-};
-
-
-/**
- * @param {number} value
- * @return {!proto.christiangeorgelucas.conventional_commit_tools.SummarizeCommitsRequest} returns this
- */
-proto.christiangeorgelucas.conventional_commit_tools.SummarizeCommitsRequest.prototype.setMaxCommits = function(value) {
-  return jspb.Message.setProto3IntField(this, 3, value);
 };
 
 
@@ -4904,7 +4814,6 @@ countsByTypeList: jspb.Message.toObjectList(msg.getCountsByTypeList(),
 breakingChangesList: jspb.Message.toObjectList(msg.getBreakingChangesList(),
     proto.christiangeorgelucas.conventional_commit_tools.ConventionalCommit.toObject, includeInstance),
 overallReleaseType: jspb.Message.getFieldWithDefault(msg, 4, ""),
-skipped: jspb.Message.getFieldWithDefault(msg, 5, 0),
 error: jspb.Message.getFieldWithDefault(msg, 6, "")
   };
 
@@ -4959,10 +4868,6 @@ proto.christiangeorgelucas.conventional_commit_tools.SummarizeCommitsResult.dese
     case 4:
       var value = /** @type {string} */ (reader.readString());
       msg.setOverallReleaseType(value);
-      break;
-    case 5:
-      var value = /** @type {number} */ (reader.readInt32());
-      msg.setSkipped(value);
       break;
     case 6:
       var value = /** @type {string} */ (reader.readString());
@@ -5024,13 +4929,6 @@ proto.christiangeorgelucas.conventional_commit_tools.SummarizeCommitsResult.seri
   if (f.length > 0) {
     writer.writeString(
       4,
-      f
-    );
-  }
-  f = message.getSkipped();
-  if (f !== 0) {
-    writer.writeInt32(
-      5,
       f
     );
   }
@@ -5153,24 +5051,6 @@ proto.christiangeorgelucas.conventional_commit_tools.SummarizeCommitsResult.prot
  */
 proto.christiangeorgelucas.conventional_commit_tools.SummarizeCommitsResult.prototype.setOverallReleaseType = function(value) {
   return jspb.Message.setProto3StringField(this, 4, value);
-};
-
-
-/**
- * optional int32 skipped = 5;
- * @return {number}
- */
-proto.christiangeorgelucas.conventional_commit_tools.SummarizeCommitsResult.prototype.getSkipped = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 5, 0));
-};
-
-
-/**
- * @param {number} value
- * @return {!proto.christiangeorgelucas.conventional_commit_tools.SummarizeCommitsResult} returns this
- */
-proto.christiangeorgelucas.conventional_commit_tools.SummarizeCommitsResult.prototype.setSkipped = function(value) {
-  return jspb.Message.setProto3IntField(this, 5, value);
 };
 
 

@@ -512,9 +512,6 @@ export class ParseCommitLogRequest extends jspb.Message {
   getDelimiter(): string;
   setDelimiter(value: string): void;
 
-  getMaxCommits(): number;
-  setMaxCommits(value: number): void;
-
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ParseCommitLogRequest.AsObject;
   static toObject(includeInstance: boolean, msg: ParseCommitLogRequest): ParseCommitLogRequest.AsObject;
@@ -529,7 +526,6 @@ export namespace ParseCommitLogRequest {
   export type AsObject = {
     log: string,
     delimiter: string,
-    maxCommits: number,
   }
 }
 
@@ -541,9 +537,6 @@ export class ParseCommitLogResult extends jspb.Message {
 
   getCount(): number;
   setCount(value: number): void;
-
-  getSkipped(): number;
-  setSkipped(value: number): void;
 
   getError(): string;
   setError(value: string): void;
@@ -562,7 +555,6 @@ export namespace ParseCommitLogResult {
   export type AsObject = {
     commitsList: Array<ConventionalCommit.AsObject>,
     count: number,
-    skipped: number,
     error: string,
   }
 }
@@ -573,9 +565,6 @@ export class SummarizeCommitsRequest extends jspb.Message {
 
   getDelimiter(): string;
   setDelimiter(value: string): void;
-
-  getMaxCommits(): number;
-  setMaxCommits(value: number): void;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): SummarizeCommitsRequest.AsObject;
@@ -591,7 +580,6 @@ export namespace SummarizeCommitsRequest {
   export type AsObject = {
     log: string,
     delimiter: string,
-    maxCommits: number,
   }
 }
 
@@ -636,9 +624,6 @@ export class SummarizeCommitsResult extends jspb.Message {
   getOverallReleaseType(): string;
   setOverallReleaseType(value: string): void;
 
-  getSkipped(): number;
-  setSkipped(value: number): void;
-
   getError(): string;
   setError(value: string): void;
 
@@ -658,7 +643,6 @@ export namespace SummarizeCommitsResult {
     countsByTypeList: Array<TypeCount.AsObject>,
     breakingChangesList: Array<ConventionalCommit.AsObject>,
     overallReleaseType: string,
-    skipped: number,
     error: string,
   }
 }
